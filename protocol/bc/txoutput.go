@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	"chain/crypto/sha3pool"
 	"chain/encoding/blockchain"
-	"chain/encoding/bufpool"
 	"chain/errors"
 )
 
@@ -17,12 +17,6 @@ type (
 		AssetVersion uint64
 		OutputCommitment
 		ReferenceData []byte
-	}
-
-	OutputCommitment struct {
-		AssetAmount
-		VMVersion      uint64
-		ControlProgram []byte
 	}
 )
 
@@ -45,83 +39,74 @@ func NewTxOutput(assetID AssetID, amount uint64, controlProgram, referenceData [
 func (to *TxOutput) readFrom(r io.Reader, txVersion uint64) (err error) {
 	to.AssetVersion, _, err = blockchain.ReadVarint63(r)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "reading asset version")
+	}
+	if txVersion == 1 && to.AssetVersion != 1 {
+		return fmt.Errorf("unrecognized asset version %d for transaction version %d", to.AssetVersion, txVersion)
 	}
 
-	_, err = to.OutputCommitment.readFrom(r, txVersion, to.AssetVersion)
+	all := txVersion == 1
+	_, err = blockchain.ReadExtensibleString(r, all, func(r io.Reader) error {
+		return to.OutputCommitment.ReadFrom(r)
+	})
 	if err != nil {
-		return err
+		return errors.Wrap(err, "reading output commitment")
 	}
 
 	to.ReferenceData, _, err = blockchain.ReadVarstr31(r)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "reading reference data")
 	}
 
-	// read and ignore the (empty) output witness
-	_, _, err = blockchain.ReadVarstr31(r)
-
-	return err
-}
-
-func (oc *OutputCommitment) readFrom(r io.Reader, txVersion, assetVersion uint64) (n int, err error) {
-	if assetVersion != 1 {
-		return n, fmt.Errorf("unrecognized asset version %d", assetVersion)
-	}
-	all := txVersion == 1
-	return blockchain.ReadExtensibleString(r, all, func(r io.Reader) error {
-		_, err := oc.AssetAmount.readFrom(r)
-		if err != nil {
-			return errors.Wrap(err, "reading asset+amount")
-		}
-
-		oc.VMVersion, _, err = blockchain.ReadVarint63(r)
-		if err != nil {
-			return errors.Wrap(err, "reading VM version")
-		}
-
-		if oc.VMVersion != 1 {
-			return fmt.Errorf("unrecognized VM version %d for asset version 1", oc.VMVersion)
-		}
-
-		oc.ControlProgram, _, err = blockchain.ReadVarstr31(r)
-		return errors.Wrap(err, "reading control program")
+	// TODO(bobg): test that serialization flags include SerWitness, when we relax the serflags-must-be-0x7 rule
+	_, err = blockchain.ReadExtensibleString(r, false, func(r io.Reader) error {
+		return to.OutputCommitment.readWitness(r)
 	})
+	return err
 }
 
 // assumes r has sticky errors
-func (to *TxOutput) writeTo(w io.Writer, serflags byte) {
-	blockchain.WriteVarint63(w, to.AssetVersion) // TODO(bobg): check and return error
-	to.OutputCommitment.writeTo(w, to.AssetVersion)
-	writeRefData(w, to.ReferenceData, serflags)
-	blockchain.WriteVarstr31(w, nil)
-}
+func (to *TxOutput) writeTo(w io.Writer, serflags byte) error {
+	_, err := blockchain.WriteVarint63(w, to.AssetVersion)
+	if err != nil {
+		return err
+	}
 
-func (to *TxOutput) witnessHash() Hash {
-	return EmptyStringHash
-}
-
-func (to *TxOutput) WriteCommitment(w io.Writer) {
-	to.OutputCommitment.writeTo(w, to.AssetVersion)
-}
-
-func (oc *OutputCommitment) writeTo(w io.Writer, assetVersion uint64) (err error) {
-	b := bufpool.Get()
-	defer bufpool.Put(b)
-	if assetVersion == 1 {
-		err = oc.AssetAmount.writeTo(b)
-		if err != nil {
-			return err
+	_, err = blockchain.WriteExtensibleString(w, func(w io.Writer) error {
+		if to.AssetVersion == 1 {
+			return to.OutputCommitment.WriteTo(w)
 		}
-		_, err = blockchain.WriteVarint63(b, oc.VMVersion)
-		if err != nil {
-			return err
-		}
-		_, err = blockchain.WriteVarstr31(b, oc.ControlProgram)
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	err = writeRefData(w, to.ReferenceData, serflags)
+	if err != nil {
+		return err
+	}
+
+	if serflags&SerWitness != 0 {
+		_, err = blockchain.WriteExtensibleString(w, func(w io.Writer) error {
+			return to.OutputCommitment.writeWitness(w)
+		})
 		if err != nil {
 			return err
 		}
 	}
-	_, err = blockchain.WriteVarstr31(w, b.Bytes())
-	return err
+	return nil
+}
+
+func (to *TxOutput) WitnessHash() (hash Hash, err error) {
+	hasher := sha3pool.Get256()
+	defer sha3pool.Put256(hasher)
+
+	err = to.OutputCommitment.writeWitness(hasher)
+	if err != nil {
+		return hash, err
+	}
+
+	hasher.Read(hash[:])
+	return hash, err
 }
