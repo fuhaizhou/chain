@@ -36,6 +36,10 @@ public class HsmSigner {
     addKey(ByteString.copyFrom(Util.hexStringToByteArray(xpub)), hsm);
   }
 
+  public static void addKey(byte[] xpub, Client hsm) {
+    addKey(ByteString.copyFrom(xpub), hsm);
+  }
+
   private static void addKey(ByteString xpub, Client hsm) {
     if (!hsmXPubs.containsKey(hsm)) {
       hsmXPubs.put(hsm, new ArrayList<ByteString>());
