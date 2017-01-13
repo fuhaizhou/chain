@@ -48,11 +48,13 @@ public class ControlProgram {
       throws ChainException {
     ArrayList<CreateControlProgramsRequest.Request> reqs = new ArrayList();
     for (Builder program : programs) {
-      CreateControlProgramsRequest.Request.Builder b = CreateControlProgramsRequest.Request.newBuilder();
+      CreateControlProgramsRequest.Request.Builder b =
+          CreateControlProgramsRequest.Request.newBuilder();
       if (program.type != null) {
         switch (program.type) {
           case "account":
-            CreateControlProgramsRequest.Account.Builder account = CreateControlProgramsRequest.Account.newBuilder();
+            CreateControlProgramsRequest.Account.Builder account =
+                CreateControlProgramsRequest.Account.newBuilder();
             if (program.params.containsKey("account_id")) {
               account.setAccountId(program.params.get("account_id").toString());
             } else if (program.params.containsKey("account_alias")) {
@@ -64,7 +66,8 @@ public class ControlProgram {
       reqs.add(b.build());
     }
 
-    CreateControlProgramsRequest req = CreateControlProgramsRequest.newBuilder().addAllRequests(reqs).build();
+    CreateControlProgramsRequest req =
+        CreateControlProgramsRequest.newBuilder().addAllRequests(reqs).build();
     CreateControlProgramsResponse resp = client.app().createControlPrograms(req);
 
     if (resp.hasError()) {

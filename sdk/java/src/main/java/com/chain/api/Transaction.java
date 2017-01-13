@@ -84,7 +84,10 @@ public class Transaction {
         throw new APIException(resp.getError());
       }
       Items items = new Items();
-      items.list = this.client.deserialize(new String(resp.getItems().toByteArray()), new TypeToken<List<Transaction>>(){}.getType());
+      items.list =
+          this.client.deserialize(
+              new String(resp.getItems().toByteArray()),
+              new TypeToken<List<Transaction>>() {}.getType());
       items.lastPage = resp.getLastPage();
       items.next = resp.getNext();
       items.setClient(this.client);
@@ -92,11 +95,11 @@ public class Transaction {
     }
 
     public void setNext(Query query) {
-      ListTxsQuery.Builder builder = ListTxsQuery.
-              newBuilder().
-              setAscendingWithLongPoll(query.ascendingWithLongPoll).
-              setStartTime(query.startTime).
-              setEndTime(query.endTime);
+      ListTxsQuery.Builder builder =
+          ListTxsQuery.newBuilder()
+              .setAscendingWithLongPoll(query.ascendingWithLongPoll)
+              .setStartTime(query.startTime)
+              .setEndTime(query.endTime);
       if (query.timeout > 0) {
         builder.setTimeout(Long.valueOf(query.timeout).toString() + "ms");
       }
@@ -409,13 +412,12 @@ public class Transaction {
     @SerializedName("allow_additional_actions")
     private boolean allowAdditionalActions;
 
-    public Template() {
-
-    }
+    public Template() {}
 
     public Template(TxTemplate proto) {
       this.rawTransaction = proto.getRawTransaction().toByteArray();
-      this.signingInstructions = SigningInstruction.fromProtobuf(proto.getSigningInstructionsList());
+      this.signingInstructions =
+          SigningInstruction.fromProtobuf(proto.getSigningInstructionsList());
       this.local = proto.getLocal();
       this.allowAdditionalActions = proto.getAllowAdditionalActions();
     }
@@ -485,7 +487,8 @@ public class Transaction {
         this.witnessComponents = WitnessComponent.fromProtobuf(proto.getWitnessComponentsList());
       }
 
-      private static List<SigningInstruction> fromProtobuf(List<TxTemplate.SigningInstruction> protos) {
+      private static List<SigningInstruction> fromProtobuf(
+          List<TxTemplate.SigningInstruction> protos) {
         ArrayList<SigningInstruction> sigs = new ArrayList();
         for (TxTemplate.SigningInstruction proto : protos) {
           sigs.add(new SigningInstruction(proto));
@@ -569,7 +572,8 @@ public class Transaction {
 
         switch (this.type) {
           case "signature":
-            TxTemplate.SignatureComponent.Builder sigComp = TxTemplate.SignatureComponent.newBuilder();
+            TxTemplate.SignatureComponent.Builder sigComp =
+                TxTemplate.SignatureComponent.newBuilder();
             sigComp.setQuorum(this.quorum);
             if (this.program != null) {
               sigComp.setProgram(ByteString.copyFrom(this.program));
@@ -968,7 +972,8 @@ public class Transaction {
       }
 
       protected com.chain.proto.Action toProtobuf(Client client) {
-        com.chain.proto.Action.SpendAccountUnspentOutput.Builder builder = com.chain.proto.Action.SpendAccountUnspentOutput.newBuilder();
+        com.chain.proto.Action.SpendAccountUnspentOutput.Builder builder =
+            com.chain.proto.Action.SpendAccountUnspentOutput.newBuilder();
         if (referenceData != null) {
           builder.setReferenceData(ByteString.copyFrom(client.serialize(referenceData)));
         }
@@ -1064,7 +1069,8 @@ public class Transaction {
       }
 
       protected com.chain.proto.Action toProtobuf(Client client) {
-        com.chain.proto.Action.SpendAccount.Builder builder = com.chain.proto.Action.SpendAccount.newBuilder();
+        com.chain.proto.Action.SpendAccount.Builder builder =
+            com.chain.proto.Action.SpendAccount.newBuilder();
         builder.setAmount(amount);
         builder.setClientToken(clientToken);
         if (referenceData != null) {
@@ -1156,6 +1162,7 @@ public class Transaction {
         assetID = Util.hexStringToByteArray(id);
         return this;
       }
+
       public ControlWithAccount setAssetId(byte[] id) {
         assetID = id;
         return this;
@@ -1173,7 +1180,8 @@ public class Transaction {
       }
 
       protected com.chain.proto.Action toProtobuf(Client client) {
-        com.chain.proto.Action.ControlAccount.Builder builder = com.chain.proto.Action.ControlAccount.newBuilder();
+        com.chain.proto.Action.ControlAccount.Builder builder =
+            com.chain.proto.Action.ControlAccount.newBuilder();
         builder.setAmount(amount);
         if (referenceData != null) {
           builder.setReferenceData(ByteString.copyFrom(client.serialize(referenceData)));
@@ -1281,7 +1289,8 @@ public class Transaction {
       }
 
       protected com.chain.proto.Action toProtobuf(Client client) {
-        com.chain.proto.Action.ControlProgram.Builder builder = com.chain.proto.Action.ControlProgram.newBuilder();
+        com.chain.proto.Action.ControlProgram.Builder builder =
+            com.chain.proto.Action.ControlProgram.newBuilder();
         builder.setAmount(amount);
         if (controlProgram != null) {
           builder.setControlProgram(ByteString.copyFrom(controlProgram));
@@ -1356,7 +1365,8 @@ public class Transaction {
       }
 
       protected com.chain.proto.Action toProtobuf(Client client) {
-        com.chain.proto.Action.ControlProgram.Builder builder = com.chain.proto.Action.ControlProgram.newBuilder();
+        com.chain.proto.Action.ControlProgram.Builder builder =
+            com.chain.proto.Action.ControlProgram.newBuilder();
         builder.setAmount(amount);
         builder.setControlProgram(ByteString.copyFrom(ControlProgram.retireProgram()));
         if (referenceData != null) {
@@ -1390,7 +1400,8 @@ public class Transaction {
       }
 
       protected com.chain.proto.Action toProtobuf(Client client) {
-        com.chain.proto.Action.SetTxReferenceData.Builder builder = com.chain.proto.Action.SetTxReferenceData.newBuilder();
+        com.chain.proto.Action.SetTxReferenceData.Builder builder =
+            com.chain.proto.Action.SetTxReferenceData.newBuilder();
         if (referenceData != null) {
           builder.setData(ByteString.copyFrom(client.serialize(referenceData)));
         }
@@ -1579,7 +1590,8 @@ public class Transaction {
      * @throws ChainException
      */
     public static Feed getByAlias(Client client, String alias) throws ChainException {
-      TxFeedResponse resp = client.app().getTxFeed(GetTxFeedRequest.newBuilder().setAlias(alias).build());
+      TxFeedResponse resp =
+          client.app().getTxFeed(GetTxFeedRequest.newBuilder().setAlias(alias).build());
       if (resp.hasError()) {
         throw new APIException(resp.getError());
       }
@@ -1648,12 +1660,12 @@ public class Transaction {
       // Long.MAX_VALUE should suffice.
       String newAfter = "" + lastTx.blockHeight + ":" + lastTx.position + "-" + Long.MAX_VALUE;
 
-      UpdateTxFeedRequest req = UpdateTxFeedRequest.
-              newBuilder().
-              setId(this.id).
-              setPreviousAfter(this.after).
-              setAfter(newAfter).
-              build();
+      UpdateTxFeedRequest req =
+          UpdateTxFeedRequest.newBuilder()
+              .setId(this.id)
+              .setPreviousAfter(this.after)
+              .setAfter(newAfter)
+              .build();
 
       TxFeedResponse resp = client.app().updateTxFeed(req);
       if (resp.hasError()) {

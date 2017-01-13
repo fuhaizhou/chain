@@ -135,7 +135,10 @@ public class UnspentOutput {
       }
 
       Items items = new Items();
-      items.list = this.client.deserialize(new String(resp.getItems().toByteArray()), new TypeToken<List<UnspentOutput>>(){}.getType());
+      items.list =
+          this.client.deserialize(
+              new String(resp.getItems().toByteArray()),
+              new TypeToken<List<UnspentOutput>>() {}.getType());
       items.lastPage = resp.getLastPage();
       items.next = resp.getNext();
       items.setClient(this.client);

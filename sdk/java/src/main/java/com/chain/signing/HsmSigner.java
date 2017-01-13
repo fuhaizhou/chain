@@ -141,7 +141,6 @@ public class HsmSigner {
       }
     }
 
-
     Map<Integer, Transaction.Template> successes = new HashMap<>();
     for (int i = 0; i < protos.size(); i++) {
       successes.put(originalIndex.get(i), new Transaction.Template(protos.get(i)));

@@ -50,16 +50,8 @@ public class TransactionTest {
     String test = "TransactionTest.testBasicTransaction.test";
 
     new Account.Builder().setAlias(alice).addRootXpub(key.xpub).setQuorum(1).create(client);
-    new Account.Builder()
-        .setAlias(bob)
-        .addRootXpub(key.xpub)
-        .setQuorum(1)
-        .create(client);
-    new Asset.Builder()
-        .setAlias(asset)
-        .addRootXpub(key.xpub)
-        .setQuorum(1)
-        .create(client);
+    new Account.Builder().setAlias(bob).addRootXpub(key.xpub).setQuorum(1).create(client);
+    new Asset.Builder().setAlias(asset).addRootXpub(key.xpub).setQuorum(1).create(client);
 
     Transaction.Template issuance =
         new Transaction.Builder()
@@ -425,16 +417,8 @@ public class TransactionTest {
     String asset = "TransactionTest.testControlPrograms.asset";
 
     new Account.Builder().setAlias(alice).addRootXpub(key.xpub).setQuorum(1).create(client);
-    new Account.Builder()
-        .setAlias(bob)
-        .addRootXpub(key.xpub)
-        .setQuorum(1)
-        .create(client);
-    new Asset.Builder()
-        .setAlias(asset)
-        .addRootXpub(key.xpub)
-        .setQuorum(1)
-        .create(client);
+    new Account.Builder().setAlias(bob).addRootXpub(key.xpub).setQuorum(1).create(client);
+    new Asset.Builder().setAlias(asset).addRootXpub(key.xpub).setQuorum(1).create(client);
     ControlProgram bobCtrlP =
         new ControlProgram.Builder().controlWithAccountByAlias(bob).create(client);
 
@@ -489,16 +473,8 @@ public class TransactionTest {
     String asset = "TransactionTest.testUnspentOutputs.asset";
 
     new Account.Builder().setAlias(alice).addRootXpub(key.xpub).setQuorum(1).create(client);
-    new Account.Builder()
-        .setAlias(bob)
-        .addRootXpub(key.xpub)
-        .setQuorum(1)
-        .create(client);
-    new Asset.Builder()
-        .setAlias(asset)
-        .addRootXpub(key.xpub)
-        .setQuorum(1)
-        .create(client);
+    new Account.Builder().setAlias(bob).addRootXpub(key.xpub).setQuorum(1).create(client);
+    new Asset.Builder().setAlias(asset).addRootXpub(key.xpub).setQuorum(1).create(client);
 
     Transaction.Template issuance =
         new Transaction.Builder()

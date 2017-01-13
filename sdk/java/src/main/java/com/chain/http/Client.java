@@ -11,7 +11,6 @@ import java.util.concurrent.Executor;
 import com.chain.exception.BadURLException;
 import com.chain.proto.*;
 
-
 import com.google.common.reflect.TypeToken;
 import io.grpc.*;
 
@@ -35,8 +34,10 @@ public class Client {
   private AppGrpc.AppBlockingStub appStub;
   private HSMGrpc.HSMBlockingStub hsmStub;
 
-  private static final Metadata.Key USERNAME = Metadata.Key.of("username", Metadata.ASCII_STRING_MARSHALLER);
-  private static final Metadata.Key PASSWORD = Metadata.Key.of("password", Metadata.ASCII_STRING_MARSHALLER);
+  private static final Metadata.Key USERNAME =
+      Metadata.Key.of("username", Metadata.ASCII_STRING_MARSHALLER);
+  private static final Metadata.Key PASSWORD =
+      Metadata.Key.of("password", Metadata.ASCII_STRING_MARSHALLER);
 
   private static class BuildProperties {
     public String version;
@@ -66,7 +67,7 @@ public class Client {
     }
   }
 
-  public Client (URL url, String accessToken) {
+  public Client(URL url, String accessToken) {
     init(url, accessToken);
   }
 
@@ -79,14 +80,14 @@ public class Client {
   }
 
   private void init(URL url, String accessToken) {
-    channel = ManagedChannelBuilder.
-            forAddress(url.getHost(), url.getPort()).
-            usePlaintext(url.getProtocol().equals("http")).
-            build();
+    channel =
+        ManagedChannelBuilder.forAddress(url.getHost(), url.getPort())
+            .usePlaintext(url.getProtocol().equals("http"))
+            .build();
 
     this.accessToken = accessToken;
-    this.appStub = (AppGrpc.AppBlockingStub)initStub(AppGrpc.newBlockingStub(channel));
-    this.hsmStub = (HSMGrpc.HSMBlockingStub)initStub(HSMGrpc.newBlockingStub(channel));
+    this.appStub = (AppGrpc.AppBlockingStub) initStub(AppGrpc.newBlockingStub(channel));
+    this.hsmStub = (HSMGrpc.HSMBlockingStub) initStub(HSMGrpc.newBlockingStub(channel));
 
     if (accessToken != null && !accessToken.isEmpty()) {
       String[] parts = accessToken.split(":");
@@ -122,11 +123,15 @@ public class Client {
   }
 
   private io.grpc.stub.AbstractStub<?> initStub(io.grpc.stub.AbstractStub<?> stub) {
-    return stub.
-            withCompression("gzip").
-            withCallCredentials(new CallCredentials() {
+    return stub.withCompression("gzip")
+        .withCallCredentials(
+            new CallCredentials() {
               @Override
-              public void applyRequestMetadata(MethodDescriptor<?, ?> methodDescriptor, Attributes attributes, Executor executor, MetadataApplier metadataApplier) {
+              public void applyRequestMetadata(
+                  MethodDescriptor<?, ?> methodDescriptor,
+                  Attributes attributes,
+                  Executor executor,
+                  MetadataApplier metadataApplier) {
 
                 Metadata authData = new Metadata();
                 if (accessUser != null && !accessUser.isEmpty()) {
@@ -143,7 +148,7 @@ public class Client {
   }
 
   public Map<String, Object> deserialize(String data) {
-    Type type = new TypeToken<HashMap<String, Object>>(){}.getType();
+    Type type = new TypeToken<HashMap<String, Object>>() {}.getType();
     return serializer.fromJson(data, type);
   }
 
