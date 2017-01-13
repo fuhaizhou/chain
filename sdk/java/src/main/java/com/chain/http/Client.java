@@ -31,7 +31,7 @@ public class Client {
   private String accessPass;
   private static final Gson serializer = new Gson();
   private static String version = "dev"; // updated in the static initializer
-  private final ManagedChannel channel;
+  private ManagedChannel channel;
   private AppGrpc.AppBlockingStub appStub;
   private HSMGrpc.HSMBlockingStub hsmStub;
 
@@ -50,13 +50,31 @@ public class Client {
     }
   }
 
-  public Client(String urlString, String accessToken) throws BadURLException {
-    URL url;
+  public Client(URL url) {
+    init(url, null);
+  }
+
+  public Client(String urlString) throws BadURLException {
     try {
-      url = new URL(urlString);
+      init(new URL(urlString), null);
     } catch (MalformedURLException e) {
       throw new BadURLException(e.getMessage());
     }
+  }
+
+  public Client (URL url, String accessToken) {
+    init(url, accessToken);
+  }
+
+  public Client(String urlString, String accessToken) throws BadURLException {
+    try {
+      init(new URL(urlString), accessToken);
+    } catch (MalformedURLException e) {
+      throw new BadURLException(e.getMessage());
+    }
+  }
+
+  private void init(URL url, String accessToken) {
     channel = ManagedChannelBuilder.
             forAddress(url.getHost(), url.getPort()).
             usePlaintext(url.getProtocol().equals("http")).
