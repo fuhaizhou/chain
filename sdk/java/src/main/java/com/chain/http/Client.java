@@ -50,6 +50,10 @@ public class Client {
     }
   }
 
+  public Client() throws BadURLException {
+    this("http://localhost:1999");
+  }
+
   public Client(URL url) {
     init(url, null);
   }
