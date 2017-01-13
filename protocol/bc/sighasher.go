@@ -17,7 +17,7 @@ func NewSigHasher(txData *TxData) *SigHasher {
 	return &SigHasher{txData: txData}
 }
 
-func (s *SigHasher) Hash(idx int) Hash {
+func (s *SigHasher) Hash(idx uint32) Hash {
 	if s.txHash == nil {
 		h := s.txData.Hash()
 		s.txHash = &h

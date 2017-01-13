@@ -296,7 +296,6 @@ func (t *TxInput) SetArguments(args [][]byte) {
 	case *SpendInput:
 		inp.Arguments = args
 	}
-	return nil
 }
 
 func (t *TxInput) witnessHash() (h Hash, err error) {
