@@ -863,7 +863,7 @@ public class Transaction {
        * @return updated action object
        */
       public Issue setAssetAlias(String alias) {
-        this.assetAlias = alias;
+        assetAlias = alias;
         return this;
       }
 
@@ -873,8 +873,13 @@ public class Transaction {
        * @param id id of the asset to be issued
        * @return updated action object
        */
+      public Issue setAssetId(String id) {
+        assetID = Util.hexStringToByteArray(id);
+        return this;
+      }
+
       public Issue setAssetId(byte[] id) {
-        this.assetID = id;
+        assetID = id;
         return this;
       }
 
@@ -893,7 +898,7 @@ public class Transaction {
       protected com.chain.proto.Action toProtobuf(Client client) {
         com.chain.proto.Action.Issue.Builder builder = com.chain.proto.Action.Issue.newBuilder();
         builder.setAmount(amount);
-        if (this.referenceData != null) {
+        if (referenceData != null) {
           builder.setReferenceData(ByteString.copyFrom(client.serialize(referenceData)));
         }
         AssetIdentifier.Builder id = AssetIdentifier.newBuilder();
@@ -1042,7 +1047,7 @@ public class Transaction {
         return this;
       }
 
-      public SpendFromAccount setAssetID(byte[] id) {
+      public SpendFromAccount setAssetId(byte[] id) {
         assetID = id;
         return this;
       }
